@@ -24,9 +24,14 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
             List<string> bitList = new List<string>();
             string[] asmWithoutComments = ReCodeComments(asmfile);
+            var asmWithoutCommentsWhiteSpace = RmWhiteSpacesStrArr(asmWithoutComments);
 
+            var tererer = FindLabels(asmWithoutCommentsWhiteSpace);
+            var lclclc = HandleLabels(tererer, asmWithoutCommentsWhiteSpace);
+            WriteToConsole(lclclc);
 
-            foreach (var line in asmWithoutComments)
+            //foreach (var line in asmWithoutComments)
+            foreach (var line in lclclc)
             {
                 if (line.StartsWith("@"))
                 {
@@ -56,8 +61,91 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             }
             //WriteToConsole(bitList);
             FileHandling fileHandler = new FileHandling();
-            fileHandler.WriteHackFile(bitList, @"C:\Users\uncha\Desktop\myRectL.hack");
+            fileHandler.WriteHackFile(bitList, @"C:\Users\uncha\Desktop\myMax.hack");
         }
+
+        public List<string> RmWhiteSpacesStrArr(string[] strArr)
+        {
+            List<string> res = new List<string>();
+            foreach (var item in strArr)
+            {
+                res.Add(item.Replace(" ", String.Empty));
+            }
+
+            return res;
+        }
+
+        public Dictionary<string, string> FindLabels(List<string> asmFile)
+        {
+            Dictionary<string, string> Labels = new Dictionary<string, string>();
+            int index = 0;
+            foreach (var line in asmFile)
+            {
+                if (line.Contains("("))
+                {
+                    var fdfd = line.Replace("(", String.Empty).Replace(")", String.Empty).Replace(" ", String.Empty);
+                    Labels.Add(fdfd, index.ToString());
+                    index--;
+                }
+                index++;
+            }
+            return Labels;
+        }
+
+        public List<String> HandleLabels(Dictionary<string, string> labels, List<string> asmFile)
+        {
+            List<string> asmWhitoutLabels = new List<string>();
+            foreach (var item in asmFile)
+            {
+                if (item.Contains("@"))
+                {
+                    foreach (var lableItem in labels)
+                    {
+                        var ffffg = item.Replace("@", String.Empty);
+                        //if (item.Contains("@") && lableItem.Key == ffffg)
+                        if (lableItem.Key == ffffg)
+                        {
+                            asmWhitoutLabels.Add("@" + lableItem.Value);
+
+                        }
+                    }
+
+
+                    Dictionary<string, string> fffkd = SetStandartPortTable();
+                    foreach (var symboles in fffkd)
+                    {
+                        var ggrrr = item.Replace("@", String.Empty);
+                        if (symboles.Key == ggrrr)
+                        {
+                            asmWhitoutLabels.Add("@" + symboles.Value);
+                        }
+                    }
+
+                    if(item.Replace("@","").All(c => char.IsDigit(c)))
+                    {
+                        asmWhitoutLabels.Add(item);
+                    }
+                }
+                else if (!item.Contains("("))
+                {
+                    asmWhitoutLabels.Add(item);
+                }
+         
+
+            }
+
+            return asmWhitoutLabels;
+        }
+
+        //public List<String> HandleSymbloes(Dictionary<string, string> sysboles, List<string> asmFile, List<string> outputlst)
+        //{
+        //    foreach (var item in asmFile)
+        //    {
+
+        //    }
+        //}
+
+
 
         public string MakeAInstruktion(string line)
         {
@@ -298,6 +386,37 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
 
             return jumpTable;
+        }
+
+        public Dictionary<string, string> SetStandartPortTable()
+        {
+            Dictionary<string, string> standartPortTable = new Dictionary<string,string>();
+
+            standartPortTable.Add("R0", "0");
+            standartPortTable.Add("R1", "1");
+            standartPortTable.Add("R2", "2");
+            standartPortTable.Add("R3", "3");
+            standartPortTable.Add("R4", "4");
+            standartPortTable.Add("R5", "5");
+            standartPortTable.Add("R6", "6");
+            standartPortTable.Add("R7", "7");
+            standartPortTable.Add("R8", "8");
+            standartPortTable.Add("R9", "9");
+            standartPortTable.Add("R10", "10");
+            standartPortTable.Add("R11", "11"); 
+            standartPortTable.Add("R12", "12");
+            standartPortTable.Add("R13", "13");
+            standartPortTable.Add("R14", "14");
+            standartPortTable.Add("R15", "15");
+            standartPortTable.Add("SP","0");
+            standartPortTable.Add("LCL", "1");
+            standartPortTable.Add("ARG", "2");
+            standartPortTable.Add("THIS", "3");
+            standartPortTable.Add("THAT", "4");
+            standartPortTable.Add("SCREEN", "16384");
+            standartPortTable.Add("KBD", "24576");
+
+            return standartPortTable;
         }
     }
 }
