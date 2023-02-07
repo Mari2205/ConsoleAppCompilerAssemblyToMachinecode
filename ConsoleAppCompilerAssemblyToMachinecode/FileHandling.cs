@@ -21,7 +21,7 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
         /// </summary>
         /// <param name="hackFileContents"></param>
         /// <param name="pathToPlaceFile">the location to put the new file</param>
-        public void WriteHackFile(byte[] hackFileContents, string pathToPlaceFile)
+        public void WriteHackFile(List<string> hackFileContents, string pathToPlaceFile)
         {
             using (StreamWriter streamWriter = new StreamWriter(pathToPlaceFile))
             {
@@ -32,5 +32,22 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
             }
         }
+
+        ///// <summary>
+        ///// this method craetes a new .hack file form a byte[] 
+        ///// </summary>
+        ///// <param name="hackFileContents"></param>
+        ///// <param name="pathToPlaceFile">the location to put the new file</param>
+        //public void WriteHackFile(string[] hackFileContents, string pathToPlaceFile)
+        //{
+        //    using (StreamWriter streamWriter = new StreamWriter(pathToPlaceFile))
+        //    {
+        //        foreach (var line in hackFileContents)
+        //        {
+        //            streamWriter.WriteLine(line);
+        //        }
+
+        //    }
+        //}
     }
 }

@@ -11,173 +11,169 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
     {
         FileHandling file = new FileHandling();
 
-        
-        
-        public void testing()
+        public void ParseAsmToHack(string asmPath)
         {
-            var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\add\Add.asm");
+            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\add\Add.asm");
             //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\max\MaxL.asm");
+            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\pong\PongL.asm");
+            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\rect\RectL.asm");
 
+            var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\max\Max.asm");
+            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\pong\Pong.asm");
+            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\rect\Rect.asm");
+
+            List<string> bitList = new List<string>();
             string[] asmWithoutComments = ReCodeComments(asmfile);
 
-            string[] data;
-            string[] bitArray;
-            List<string> bitList = new List<string>();
 
             foreach (var line in asmWithoutComments)
             {
-                
-                var oneLine = "";
                 if (line.StartsWith("@"))
                 {
-                    var split = line.Split('@');
-                    var num = Convert.ToInt32(split[1]);
+                    bitList.Add(MakeAInstruktion(line));
 
-                    var f = convertNumToByte(num);
-                    data = new string[] { f };
-                    bitArray = data;
-                    bitList.Add(f);
-                    
                 }
-                else if(line.Contains("="))
+                else if (line.Contains("="))
                 {
-                    oneLine = "111";
-                    var Fistsplit = line.Split('=');
-                    var dest = Fistsplit[0];
-                    var comp = string.Empty;
-                    var jump = "000";
+                    var DCJ = SplitUpByEQ(line);
+                    var dest = DCJ["dest"];
+                    var comp = DCJ["comp"];
+                    var jump = DCJ["jump"];
 
-                    //string tetererr = Fistsplit[1];
-                    //bool tttteee = tetererr.Contains(";");
-                    //if (Fistsplit[1].Contains(";"))
-                    if (Fistsplit[1].Contains(';'))
-                    {
-                        var Secondsplit = Fistsplit[1].Split(';');
-                        comp = Secondsplit[0];
-                        jump = Secondsplit[1];
-                    }
-                    else
-                    {
-                        comp = Fistsplit[1];
-                        jump = "";
-                    }
-
-                    var compdir = SetCompTable();
-                    var destdir = SetDestTable();
-                    var jumpdir = SetJumpTable();
-                    
-                    
-
-
-
-                    foreach (var item in compdir)
-                    {
-                        if (item.Key == comp)
-                        {
-                            oneLine = oneLine + item.Value;
-                        }
-                    }
-
-                    foreach (var item in destdir)
-                    {
-                        if (item.Key == dest)
-                        {
-                            oneLine = oneLine + item.Value;
-                        }
-                    }
-
-                    foreach (var item in jumpdir)
-                    {
-                        if (item.Key == jump)
-                        {
-                            oneLine = oneLine + item.Value;
-                        }
-                        else
-                        {
-                            oneLine = oneLine + jump;
-                        }
-                    }
-
-                    var o = oneLine;
-                    data = new string[] { o };
-                    //bitArray.Concat("f");
-                    bitList.Add(o);
-
+                    bitList.Add(LoopThowDictornary(dest, comp, jump));
 
                 }
                 else
                 {
-                    oneLine = "111";
-                    var Fistsplit = line.Split(';');
-                    var dest = Fistsplit[0];
-                    var comp = string.Empty;
-                    var jump = "000";
+                    var DCJ = SplitUpByKol(line);
+                    var dest = DCJ["dest"];
+                    var comp = DCJ["comp"];
+                    var jump = DCJ["jump"];
 
-                    //string tetererr = Fistsplit[1];
-                    //bool tttteee = tetererr.Contains(";");
-                    //if (Fistsplit[1].Contains(";"))
-                    if (Fistsplit[1].Contains(';'))
-                    {
-                        var Secondsplit = Fistsplit[1].Split(';');
-                        comp = Secondsplit[0];
-                        jump = Secondsplit[1];
-                    }
-                    else
-                    {
-                        comp = Fistsplit[1];
-                        jump = "";
-                    }
-
-                    var compdir = SetCompTable();
-                    var destdir = SetDestTable();
-                    var jumpdir = SetJumpTable();
-
-
-
-
-
-                    foreach (var item in compdir)
-                    {
-                        if (item.Key == comp)
-                        {
-                            oneLine = oneLine + item.Value;
-                        }
-                    }
-
-                    foreach (var item in destdir)
-                    {
-                        if (item.Key == dest)
-                        {
-                            oneLine = oneLine + item.Value;
-                        }
-                    }
-
-                    foreach (var item in jumpdir)
-                    {
-                        if (item.Key == jump)
-                        {
-                            oneLine = oneLine + item.Value;
-                        }
-                        else
-                        {
-                            oneLine = oneLine + jump;
-                        }
-                    }
-
-                    var o = oneLine;
-                    data = new string[] { o };
-                    //bitArray.Concat("f");
-                    bitList.Add(o);
-
+                    bitList.Add(LoopThowDictornary(dest, comp, jump));
 
                 }
             }
-            foreach (var item in bitList)
+            //WriteToConsole(bitList);
+            FileHandling fileHandler = new FileHandling();
+            fileHandler.WriteHackFile(bitList, @"C:\Users\uncha\Desktop\myRectL.hack");
+        }
+
+        public string MakeAInstruktion(string line)
+        {
+            var split = line.Split('@');
+            var num = Convert.ToInt32(split[1]);
+
+            var f = convertNumToByte(num);
+            return f;
+        }
+
+        public void WriteToConsole(List<string> hackfile)
+        {
+            foreach (var item in hackfile)
             {
                 Console.WriteLine(item);
             }
             Console.ReadLine();
+        }
 
+        public string LoopThowDictornary(string dest, string comp, string jump)
+        {
+            var oneLine = "111";
+            var compdir = SetCompTable();
+            var destdir = SetDestTable();
+            var jumpdir = SetJumpTable();
+
+
+            foreach (var item in compdir)
+            {
+                if (item.Key == comp)
+                {
+                    oneLine = oneLine + item.Value;
+                }
+            }
+
+            foreach (var item in destdir)
+            {
+                if (item.Key == dest)
+                {
+                    oneLine = oneLine + item.Value;
+                }
+            }
+
+            foreach (var item in jumpdir)
+            {
+                if (item.Key == jump)
+                {
+                    oneLine = oneLine + item.Value;
+                }
+                //else
+                //{
+                //    oneLine = oneLine + jump;
+                //}
+            }
+
+            //bitList.Add(oneLine);
+            return oneLine;
+            
+        }
+
+        public Dictionary<string, string> SplitUpByKol(string line)
+        {
+            Dictionary<string, string> DCJDic = new Dictionary<string, string>();
+
+            var Fistsplit = line.Split(';');
+            var dest = "";
+            var comp = Fistsplit[0];
+            var jump = Fistsplit[1];
+
+
+            //if (Fistsplit[1].Contains(';'))
+            //{
+            //    var Secondsplit = Fistsplit[1].Split(';');
+            //    comp = Secondsplit[0];
+            //    jump = Secondsplit[1];
+            //}
+            //else
+            //{
+            //    comp = Fistsplit[1];
+            //    jump = "";
+            //}
+
+            DCJDic.Add("dest", dest);
+            DCJDic.Add("comp", comp);
+            DCJDic.Add("jump", jump);
+            return DCJDic;
+        }
+
+        public Dictionary<string, string> SplitUpByEQ(string line)
+        {
+            Dictionary<string, string> DCJDic = new Dictionary<string, string>();
+
+            var Fistsplit = line.Split('=');
+            var dest = Fistsplit[0];
+            var comp = string.Empty;
+            var jump = "000";
+
+            //string tetererr = Fistsplit[1];
+            //bool tttteee = tetererr.Contains(";");
+            //if (Fistsplit[1].Contains(";"))
+            if (Fistsplit[1].Contains(';'))
+            {
+                var Secondsplit = Fistsplit[1].Split(';');
+                comp = Secondsplit[0];
+                jump = Secondsplit[1];
+            }
+            else
+            {
+                comp = Fistsplit[1];
+                jump = "";
+            }
+
+            DCJDic.Add("dest", dest);
+            DCJDic.Add("comp", comp);
+            DCJDic.Add("jump", jump);
+            return DCJDic;
         }
 
         public string convertNumToByte(int num)
@@ -249,7 +245,7 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             compTable.Add("-A", "0110011");
             compTable.Add("D+1", "0011111");
             compTable.Add("A+1", "0110111");
-            compTable.Add("D-1", "0011110");
+            compTable.Add("D-1", "0001110");//0011110
             compTable.Add("A-1", "0110010");
             compTable.Add("D+A", "0000010");//
             compTable.Add("D-A", "0010011");
@@ -261,7 +257,7 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             compTable.Add("!M", "1110001");
             compTable.Add("-M", "1110011");
             compTable.Add("M+1", "1110111");
-            compTable.Add("M-1", "1110011");
+            compTable.Add("M-1", "1110010");//1110011
             compTable.Add("D+M", "1000010");
             compTable.Add("D-M", "1010011");
             compTable.Add("M-D", "1000111");
