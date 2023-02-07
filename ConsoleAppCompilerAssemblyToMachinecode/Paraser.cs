@@ -18,9 +18,9 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\pong\PongL.asm");
             //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\rect\RectL.asm");
 
-            var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\max\Max.asm");
+            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\max\Max.asm");
             //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\pong\Pong.asm");
-            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\rect\Rect.asm");
+            var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\rect\Rect.asm");
 
             List<string> bitList = new List<string>();
             string[] asmWithoutComments = ReCodeComments(asmfile);
@@ -28,7 +28,7 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
             var tererer = FindLabels(asmWithoutCommentsWhiteSpace);
             var lclclc = HandleLabels(tererer, asmWithoutCommentsWhiteSpace);
-            WriteToConsole(lclclc);
+            //WriteToConsole(lclclc);
 
             //foreach (var line in asmWithoutComments)
             foreach (var line in lclclc)
@@ -61,7 +61,7 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             }
             //WriteToConsole(bitList);
             FileHandling fileHandler = new FileHandling();
-            fileHandler.WriteHackFile(bitList, @"C:\Users\uncha\Desktop\myMax.hack");
+            fileHandler.WriteHackFile(bitList, @"C:\Users\uncha\Desktop\myRect.hack");
         }
 
         public List<string> RmWhiteSpacesStrArr(string[] strArr)
@@ -144,6 +144,13 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
         //    }
         //}
+
+        public void FindCustomSysmblos(List<string> asmFile)
+        {
+            Dictionary<string, string> sysboles = new Dictionary<string, string>();
+
+
+        }
 
 
 
