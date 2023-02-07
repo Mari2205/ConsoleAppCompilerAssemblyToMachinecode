@@ -13,16 +13,16 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
         
         
-
-
-
         public void testing()
         {
             var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\add\Add.asm");
+            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\max\MaxL.asm");
 
             string[] asmWithoutComments = ReCodeComments(asmfile);
 
             string[] data;
+            string[] bitArray;
+            List<string> bitList = new List<string>();
 
             foreach (var line in asmWithoutComments)
             {
@@ -35,8 +35,11 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
                     var f = convertNumToByte(num);
                     data = new string[] { f };
+                    bitArray = data;
+                    bitList.Add(f);
+                    
                 }
-                else
+                else if(line.Contains("="))
                 {
                     oneLine = "111";
                     var Fistsplit = line.Split('=');
@@ -44,7 +47,10 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
                     var comp = string.Empty;
                     var jump = "000";
 
-                    if (Fistsplit[1].Contains(";"))
+                    //string tetererr = Fistsplit[1];
+                    //bool tttteee = tetererr.Contains(";");
+                    //if (Fistsplit[1].Contains(";"))
+                    if (Fistsplit[1].Contains(';'))
                     {
                         var Secondsplit = Fistsplit[1].Split(';');
                         comp = Secondsplit[0];
@@ -94,11 +100,83 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
                     var o = oneLine;
                     data = new string[] { o };
+                    //bitArray.Concat("f");
+                    bitList.Add(o);
+
+
+                }
+                else
+                {
+                    oneLine = "111";
+                    var Fistsplit = line.Split(';');
+                    var dest = Fistsplit[0];
+                    var comp = string.Empty;
+                    var jump = "000";
+
+                    //string tetererr = Fistsplit[1];
+                    //bool tttteee = tetererr.Contains(";");
+                    //if (Fistsplit[1].Contains(";"))
+                    if (Fistsplit[1].Contains(';'))
+                    {
+                        var Secondsplit = Fistsplit[1].Split(';');
+                        comp = Secondsplit[0];
+                        jump = Secondsplit[1];
+                    }
+                    else
+                    {
+                        comp = Fistsplit[1];
+                        jump = "";
+                    }
+
+                    var compdir = SetCompTable();
+                    var destdir = SetDestTable();
+                    var jumpdir = SetJumpTable();
+
+
+
+
+
+                    foreach (var item in compdir)
+                    {
+                        if (item.Key == comp)
+                        {
+                            oneLine = oneLine + item.Value;
+                        }
+                    }
+
+                    foreach (var item in destdir)
+                    {
+                        if (item.Key == dest)
+                        {
+                            oneLine = oneLine + item.Value;
+                        }
+                    }
+
+                    foreach (var item in jumpdir)
+                    {
+                        if (item.Key == jump)
+                        {
+                            oneLine = oneLine + item.Value;
+                        }
+                        else
+                        {
+                            oneLine = oneLine + jump;
+                        }
+                    }
+
+                    var o = oneLine;
+                    data = new string[] { o };
+                    //bitArray.Concat("f");
+                    bitList.Add(o);
+
+
                 }
             }
-
-
-            
+            foreach (var item in bitList)
+            {
+                Console.WriteLine(item);
+            }
+            Console.ReadLine();
 
         }
 
@@ -173,7 +251,7 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             compTable.Add("A+1", "0110111");
             compTable.Add("D-1", "0011110");
             compTable.Add("A-1", "0110010");
-            compTable.Add("D+A", "0101010");
+            compTable.Add("D+A", "0000010");//
             compTable.Add("D-A", "0010011");
             compTable.Add("A-D", "0000111");
             compTable.Add("D&A", "0000000");
