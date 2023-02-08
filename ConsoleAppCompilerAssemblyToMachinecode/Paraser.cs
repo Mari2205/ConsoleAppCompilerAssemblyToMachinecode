@@ -29,9 +29,11 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             var tererer = FindLabels(asmWithoutCommentsWhiteSpace);
             var lclclc = HandleLabels(tererer, asmWithoutCommentsWhiteSpace);
             //WriteToConsole(lclclc);
-
+            var kdkdk = FindCustomSysmblos(lclclc);
+            var cckk = HandleSysmblos(lclclc, kdkdk);
+            //WriteToConsole(cckk);
             //foreach (var line in asmWithoutComments)
-            foreach (var line in lclclc)
+            foreach (var line in cckk)
             {
                 if (line.StartsWith("@"))
                 {
@@ -121,7 +123,14 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
                         }
                     }
 
-                    if(item.Replace("@","").All(c => char.IsDigit(c)))
+                    //if(item.Replace("@","").All(c => char.IsDigit(c)))
+                    //{
+                    //    asmWhitoutLabels.Add(item);
+                    //}
+
+                    Dictionary<string, string> rrtt = SetStandartPortTable();
+                    var fefefr = item.Replace("@", String.Empty);
+                    if (!rrtt.ContainsKey(fefefr) && !labels.ContainsKey(fefefr))
                     {
                         asmWhitoutLabels.Add(item);
                     }
@@ -145,14 +154,61 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
         //    }
         //}
 
-        public void FindCustomSysmblos(List<string> asmFile)
+        public Dictionary<string, string> FindCustomSysmblos(List<string> asmFile)
         {
             Dictionary<string, string> sysboles = new Dictionary<string, string>();
+            var index = 16;
+            foreach (var item in asmFile)
+            {
+                if (item.Contains("@"))
+                {
+                    var fff = item.Replace("@", String.Empty);
+                    if (!sysboles.ContainsKey(fff))
+                    {
+                        if (!item.Replace("@", "").All(c => char.IsDigit(c)))
+                        {
+                            var ri = item;
+                            sysboles.Add(fff, index.ToString());
+                            index++;
+                        }
+                    }
 
-
+                }
+            }
+            return sysboles;
         }
 
-
+        public List<string> HandleSysmblos(List<string> asmFile, Dictionary<string, string> sysbols)
+        {
+            List<string> output = new List<string>();
+            foreach (var item in asmFile)
+            {
+                if (item.Contains("@"))
+                {
+                    var fkf = item.Replace("@", String.Empty);
+                    if (sysbols.ContainsKey(fkf))
+                    {
+                        foreach (var sysitem in sysbols)
+                        {
+                            if (sysitem.Key == fkf)
+                            {
+                                output.Add("@" + sysitem.Value);
+                            }
+                        }
+                        //output.Add("@" + sysbols[fkf].value);
+                    }
+                    else
+                    {
+                        output.Add(item);
+                    }
+                }
+                else
+                {
+                    output.Add(item);
+                }
+            }
+            return output;
+        }
 
         public string MakeAInstruktion(string line)
         {
