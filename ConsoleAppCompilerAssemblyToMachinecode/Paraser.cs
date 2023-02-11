@@ -13,70 +13,58 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
         public void ParseAsmToHack(string asmPath)
         {
-            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\add\Add.asm");
-            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\max\MaxL.asm");
-            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\pong\PongL.asm");
-            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\rect\RectL.asm");
-
-            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\max\Max.asm");
-            //var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\pong\Pong.asm");
-            var asmfile = file.ReadAsmFile(@"C:\Users\uncha\Desktop\nand2tetris\projects\06\rect\Rect.asm");
+            var asmfile = GetFile(); 
 
             List<string> bitList = new List<string>();
-            string[] asmWithoutComments = ReCodeComments(asmfile);
-            var asmWithoutCommentsWhiteSpace = RmWhiteSpacesStrArr(asmWithoutComments);
 
-            var tererer = FindLabels(asmWithoutCommentsWhiteSpace);
-            var lclclc = HandleLabels(tererer, asmWithoutCommentsWhiteSpace);
-            //WriteToConsole(lclclc);
-            var kdkdk = FindCustomSysmblos(lclclc);
-            var cckk = HandleSysmblos(lclclc, kdkdk);
-            //WriteToConsole(cckk);
-            //foreach (var line in asmWithoutComments)
-            foreach (var line in cckk)
+            var asmFileClean = Utilities.CleanUpFile(asmfile);
+
+            var labelsInFile = FindLabels(asmFileClean);
+            var labelsReplaced = HandleLabels(labelsInFile, asmFileClean);
+
+            var sysmblosInFile = FindCustomSysmblos(labelsReplaced);
+            var sysblosReplaced = HandleSysmblos(labelsReplaced, sysmblosInFile);
+
+            foreach (var line in sysblosReplaced)
             {
                 if (line.StartsWith("@"))
                 {
-                    bitList.Add(MakeAInstruktion(line));
-
-                }
-                else if (line.Contains("="))
-                {
-                    var DCJ = SplitUpByEQ(line);
-                    var dest = DCJ["dest"];
-                    var comp = DCJ["comp"];
-                    var jump = DCJ["jump"];
-
-                    bitList.Add(LoopThowDictornary(dest, comp, jump));
+                    bitList.Add(handelAInstruktion(line));
 
                 }
                 else
                 {
-                    var DCJ = SplitUpByKol(line);
-                    var dest = DCJ["dest"];
-                    var comp = DCJ["comp"];
-                    var jump = DCJ["jump"];
-
-                    bitList.Add(LoopThowDictornary(dest, comp, jump));
-
+                    bitList.Add(handelCInstruktion(line));
                 }
             }
-            //WriteToConsole(bitList);
-            FileHandling fileHandler = new FileHandling();
-            fileHandler.WriteHackFile(bitList, @"C:\Users\uncha\Desktop\myRect.hack");
+            WriteFile(bitList);
         }
 
-        public List<string> RmWhiteSpacesStrArr(string[] strArr)
+        #region File handeling
+        private string[] GetFile()
         {
-            List<string> res = new List<string>();
-            foreach (var item in strArr)
-            {
-                res.Add(item.Replace(" ", String.Empty));
-            }
+            var basePath = @"C:\Users\uncha\Desktop\nand2tetris\projects\06\";
+            var pathToAdd = basePath + @"add\Add.asm";
+            var pathToMaxL = basePath + @"max\MaxL.asm";
+            var pathToPongL = basePath + @"add\PongL.asm";
+            var pathToRectL = basePath + @"add\RectL.asm";
 
-            return res;
+            var pathToMax = basePath + @"max\Max.asm"; 
+            var pathToPong = basePath + @"pong\Pong.asm";
+            var pathToRect = basePath + @"rect\Rect.asm";
+
+            var output = file.ReadAsmFile(pathToRect);
+
+            return output;
         }
 
+        private void WriteFile(List<string> bitList)
+        {
+            file.WriteHackFile(bitList, @"C:\Users\uncha\Desktop\myRect.hack");
+        }
+        #endregion
+
+        #region Handel labels, sysmblos
         public Dictionary<string, string> FindLabels(List<string> asmFile)
         {
             Dictionary<string, string> Labels = new Dictionary<string, string>();
@@ -85,8 +73,8 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             {
                 if (line.Contains("("))
                 {
-                    var fdfd = line.Replace("(", String.Empty).Replace(")", String.Empty).Replace(" ", String.Empty);
-                    Labels.Add(fdfd, index.ToString());
+                    var findLabelText = line.Replace("(", String.Empty).Replace(")", String.Empty).Replace(" ", String.Empty);
+                    Labels.Add(findLabelText, index.ToString());
                     index--;
                 }
                 index++;
@@ -101,36 +89,26 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             {
                 if (item.Contains("@"))
                 {
+                    var rmAtSign = item.Replace("@", String.Empty);
                     foreach (var lableItem in labels)
                     {
-                        var ffffg = item.Replace("@", String.Empty);
-                        //if (item.Contains("@") && lableItem.Key == ffffg)
-                        if (lableItem.Key == ffffg)
+                        if (lableItem.Key == rmAtSign)
                         {
                             asmWhitoutLabels.Add("@" + lableItem.Value);
 
                         }
                     }
 
-
-                    Dictionary<string, string> fffkd = SetStandartPortTable();
-                    foreach (var symboles in fffkd)
+                    Dictionary<string, string> predMemLoc = SetStandartPortTable();
+                    foreach (var symboles in predMemLoc)
                     {
-                        var ggrrr = item.Replace("@", String.Empty);
-                        if (symboles.Key == ggrrr)
+                        if (symboles.Key == rmAtSign)
                         {
                             asmWhitoutLabels.Add("@" + symboles.Value);
                         }
                     }
 
-                    //if(item.Replace("@","").All(c => char.IsDigit(c)))
-                    //{
-                    //    asmWhitoutLabels.Add(item);
-                    //}
-
-                    Dictionary<string, string> rrtt = SetStandartPortTable();
-                    var fefefr = item.Replace("@", String.Empty);
-                    if (!rrtt.ContainsKey(fefefr) && !labels.ContainsKey(fefefr))
+                    if (!predMemLoc.ContainsKey(rmAtSign) && !labels.ContainsKey(rmAtSign))
                     {
                         asmWhitoutLabels.Add(item);
                     }
@@ -139,20 +117,9 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
                 {
                     asmWhitoutLabels.Add(item);
                 }
-         
-
             }
-
             return asmWhitoutLabels;
         }
-
-        //public List<String> HandleSymbloes(Dictionary<string, string> sysboles, List<string> asmFile, List<string> outputlst)
-        //{
-        //    foreach (var item in asmFile)
-        //    {
-
-        //    }
-        //}
 
         public Dictionary<string, string> FindCustomSysmblos(List<string> asmFile)
         {
@@ -162,13 +129,13 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             {
                 if (item.Contains("@"))
                 {
-                    var fff = item.Replace("@", String.Empty);
-                    if (!sysboles.ContainsKey(fff))
+                    var rmAtSign = item.Replace("@", String.Empty);
+                    if (!sysboles.ContainsKey(rmAtSign))
                     {
                         if (!item.Replace("@", "").All(c => char.IsDigit(c)))
                         {
                             var ri = item;
-                            sysboles.Add(fff, index.ToString());
+                            sysboles.Add(rmAtSign, index.ToString());
                             index++;
                         }
                     }
@@ -185,17 +152,16 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             {
                 if (item.Contains("@"))
                 {
-                    var fkf = item.Replace("@", String.Empty);
-                    if (sysbols.ContainsKey(fkf))
+                    var rmAtSign = item.Replace("@", String.Empty);
+                    if (sysbols.ContainsKey(rmAtSign))
                     {
                         foreach (var sysitem in sysbols)
                         {
-                            if (sysitem.Key == fkf)
+                            if (sysitem.Key == rmAtSign)
                             {
                                 output.Add("@" + sysitem.Value);
                             }
                         }
-                        //output.Add("@" + sysbols[fkf].value);
                     }
                     else
                     {
@@ -209,25 +175,9 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             }
             return output;
         }
+        #endregion
 
-        public string MakeAInstruktion(string line)
-        {
-            var split = line.Split('@');
-            var num = Convert.ToInt32(split[1]);
-
-            var f = convertNumToByte(num);
-            return f;
-        }
-
-        public void WriteToConsole(List<string> hackfile)
-        {
-            foreach (var item in hackfile)
-            {
-                Console.WriteLine(item);
-            }
-            Console.ReadLine();
-        }
-
+        #region Dictornary loop, splits
         public string LoopThowDictornary(string dest, string comp, string jump)
         {
             var oneLine = "111";
@@ -258,13 +208,7 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
                 {
                     oneLine = oneLine + item.Value;
                 }
-                //else
-                //{
-                //    oneLine = oneLine + jump;
-                //}
             }
-
-            //bitList.Add(oneLine);
             return oneLine;
             
         }
@@ -277,19 +221,6 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             var dest = "";
             var comp = Fistsplit[0];
             var jump = Fistsplit[1];
-
-
-            //if (Fistsplit[1].Contains(';'))
-            //{
-            //    var Secondsplit = Fistsplit[1].Split(';');
-            //    comp = Secondsplit[0];
-            //    jump = Secondsplit[1];
-            //}
-            //else
-            //{
-            //    comp = Fistsplit[1];
-            //    jump = "";
-            //}
 
             DCJDic.Add("dest", dest);
             DCJDic.Add("comp", comp);
@@ -306,9 +237,6 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             var comp = string.Empty;
             var jump = "000";
 
-            //string tetererr = Fistsplit[1];
-            //bool tttteee = tetererr.Contains(";");
-            //if (Fistsplit[1].Contains(";"))
             if (Fistsplit[1].Contains(';'))
             {
                 var Secondsplit = Fistsplit[1].Split(';');
@@ -326,61 +254,44 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
             DCJDic.Add("jump", jump);
             return DCJDic;
         }
+        #endregion
 
-        public string convertNumToByte(int num)
+        #region A and C instruktion
+        public string handelAInstruktion(string line)
         {
-            var f = Convert.ToInt16("2", 16);
-            var bin = Convert.ToString(2, 16);
-            var bind = Convert.ToString(num, 2);
+            var split = line.Split('@');
+            var num = Convert.ToInt32(split[1]);
 
-            var cout = bind.Length;
-            var bitstring = "0000000000000000";
-            var sb = new StringBuilder(bitstring);
-
-            var fg = bind.Reverse().ToArray();
-            var bitfull = "";//fg.ToString();
-            var incot = 16 - cout;
-            for (int i = 0; i < incot; i++)
-            {
-                bitfull = bitfull + "0";
-            }
-            var tere = bitfull + bind;
-            return tere;
-            //foreach (var i in bind)
-            //{
-            //    sb.Replace();
-            //}
-            //for (int i = 15; i < 0; i--)
-            //{
-            //    sb 
-            //}
-            //return f;
+            var bits = Utilities.ConvertNumToByte(num);
+            return bits;
         }
-        public string[] ReCodeComments(string[] asmFile)
+
+        private string handelCInstruktion(string line)
         {
-
-            for (int i = 0; i < asmFile.Length; i++)
+            if (line.Contains("="))
             {
-                if (asmFile[i].Contains("//"))
-                {
-                    if (asmFile[i].StartsWith("//"))
-                    {
-                        asmFile[i] = "";
-                    }
-                    else
-                    {
-                        var indexOfCumment = asmFile[i].IndexOf("//");
-                        var f = asmFile[i].Remove(indexOfCumment);
-                        asmFile[i] = f;
-                    }
+                var DCJ = SplitUpByEQ(line);
+                var dest = DCJ["dest"];
+                var comp = DCJ["comp"];
+                var jump = DCJ["jump"];
 
-                }
+                return LoopThowDictornary(dest, comp, jump);
+
             }
+            else
+            {
+                var DCJ = SplitUpByKol(line);
+                var dest = DCJ["dest"];
+                var comp = DCJ["comp"];
+                var jump = DCJ["jump"];
 
-            var content = asmFile.Where(s => s != "").ToArray();
-            return content;
+                return LoopThowDictornary(dest, comp, jump);
+
+            }
         }
-        
+        #endregion
+
+        #region Dictionarys
         public Dictionary<string, string> SetCompTable()
         {
             Dictionary<string, string> compTable = new Dictionary<string, 
@@ -481,5 +392,6 @@ namespace ConsoleAppCompilerAssemblyToMachinecode
 
             return standartPortTable;
         }
+        #endregion
     }
 }
